@@ -2,13 +2,15 @@
 //-----------------------------------------------
 
 private int generation = 0;                                            //GENERATION COUNTER
-private float mutationRate = 1f;                                       //% CHANCE OF MUTATION  //EDITABLE FROM UI
-private int populationAmout = 1000;
+private float mutationRate = 25.0f;                                    //% CHANCE OF MUTATION  //EDITABLE FROM UI
+private float maxDifference;
+private int populationAmout = 20;
 private DNA[] population;                                              //POPULATION ARRAY - SIZE EDITABLE FROM UI AT START
 private ArrayList<DNA> matingPool = new ArrayList();                   //MATING POOL - PROGRAMATICALLY RESIZED AS REQUIRED
 
 PImage sourceImage, displayImage;                                      //THE IMAGE WE WANT TO RECONSTRUCT
 color[] sourceColors;                                                  //CACHED COLOR ARRAY OF SRCIMG COLORS
+ArrayList sourceColorPallete = new ArrayList();
 float[] fitnessScores;
 
 boolean display;                      
@@ -19,6 +21,11 @@ void setup()
 {
   size(700, 500);
   frameRate(5);
+  
+  DNA dna = new DNA(false, false);
+  
+  maxDifference = dna.CompareColor(color(255, 255, 255), color(0, 0, 0));
+  
   Begin();
 }
 
@@ -31,11 +38,11 @@ void draw()
   if (display)
   {
     image(displayImage, 150, 50, 400, 400);
-//    if (keys[' '] && !pauseInputs)
-//    {
-//      pauseInputs = true;
-//      Generate();                                                      //BEGIN SEQENCE
-//    }
+    if (keys[' '] && !pauseInputs)
+    {
+      pauseInputs = true;
+      Generate();                                                      //BEGIN SEQENCE
+    }
 if(frameCount % 5 == 0)
 {
   Generate();
@@ -52,7 +59,7 @@ void Begin()
 void loadSourceImage()
 {
   sourceImage = loadImage("SRC.jpg");                                 //LOAD IMAGE FROM DATA FOLDER
-  sourceImage.resize(10,10);
+  sourceImage.resize(400,400);
   sourceImage.loadPixels();                            
   sourceColors = new color[sourceImage.pixels.length];  
   for (int i = 0; i < sourceColors.length; i++)
@@ -60,6 +67,25 @@ void loadSourceImage()
     sourceColors[i] = sourceImage.pixels[i];                          //ASSIGN sourceColos ARRAY TO BE EQUAL TO sourceImage
   }
   displayImage = sourceImage;                                         //SET PIMAGE CONTAINER TO DISPLAY ON SCREEN
+  
+  
+  
+//  for(int i = 0 ; i < sourceColors.length; i++)
+//  {
+//    color c = sourceColors[i];
+//    if(i == 0)
+//    {
+//      sourceColorPallete.add(c);
+//    }
+//    for(int j = 0; j < sourceColorPallete.size(); j++)
+//    {
+//      if(sourceColorPallete.get(i) == c)
+//      {
+//        break;
+//      }
+//    }
+//  }
+//  println(sourceColorPallete.length);
 }
 
 void Generate()
@@ -105,7 +131,7 @@ void Generate()
 
 PImage CreateImageFromColorArray(color[] colors)                      //CREATE IMAGE FROM COLOR ARRAY
 {
-  PImage newImage = new PImage(10, 10);                             //CREATE NEW PIMAGE
+  PImage newImage = new PImage(400, 400);                             //CREATE NEW PIMAGE
   newImage.loadPixels();                                          
   for (int i = 0; i < colors.length; i++)                              //LOOP THROUGH PIXEL ARRAY   
   {
@@ -121,8 +147,10 @@ void BuildMatingPool(float[] fitnessScores, float topFitnessScore)
   matingPool.clear();
   for (int i = 0; i < fitnessScores.length; i++)
   {
-    fitnessScores[i] = map(fitnessScores[i], 0, topFitnessScore, 0, 1);
-    println(fitnessScores[i]);
+//    fitnessScores[i] = map(fitnessScores[i], 0, topFitnessScore, 10, 0);
+        fitnessScores[i] = map(fitnessScores[i], 0, topFitnessScore, 1, 10);
+
+//    println(fitnessScores[i]);
   }
   
   for (int i = 0; i < fitnessScores.length; i++)
@@ -133,7 +161,7 @@ void BuildMatingPool(float[] fitnessScores, float topFitnessScore)
     }
   }
   
-  println(matingPool.size());
+//  println(matingPool.size());
 }
 
 DNA Crossover()
@@ -144,8 +172,9 @@ DNA Crossover()
   
   for(int i =  0; i < child.colors.length; i++)
   {
-    float rnd = random(1);
-    child.colors[i] = (rnd > 0.5) ? mother.colors[i] : father.colors[i];
+    //float rnd = random(1);
+    //child.colors[i] = (rnd > 0.5) ? mother.colors[i] : father.colors[i];
+    child.colors[i] = (mother.colors[i] > father.colors[i]) ? mother.colors[i] : father.colors[i];
   }
   
   return child;
